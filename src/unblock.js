@@ -77,6 +77,17 @@ export const unblock = function(...scriptUrlsOrRegexes) {
             }
             scriptNode.setAttribute('src', script.src)
             scriptNode.setAttribute('type', type || 'application/javascript')
+            scriptNode.addEventListener('load', () => {
+                const scriptDomain = new URL(script.src).hostname;
+                const eventName = `unblocked:${scriptDomain}`;
+                const fullPath = script.src;
+
+                const event = new CustomEvent(eventName, {
+                    detail: { path: fullPath }
+                });
+
+                document.dispatchEvent(event);
+            });
             document.head.appendChild(scriptNode)
             backupScripts.blacklisted.splice(index - indexOffset, 1)
             indexOffset++
